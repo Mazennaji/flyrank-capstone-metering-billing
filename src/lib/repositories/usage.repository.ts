@@ -36,4 +36,16 @@ export const usageRepository = {
       error.code === "P2002"
     );
   },
+  async rollup(tenantId: string) {
+    const grouped = await prisma.usageEvent.groupBy({
+      by: ["type"],
+      where: { tenantId },
+      _sum: { quantity: true, costCents: true },
+    });
+    return grouped.map((g) => ({
+      type: g.type as UsageType,
+      quantity: g._sum.quantity ?? BigInt(0),
+      costCents: g._sum.costCents ?? 0,
+    }));
+  },
 };
