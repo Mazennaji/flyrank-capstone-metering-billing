@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { meterService } from "@/lib/services/meter.service";
 import { resolveTenant } from "@/lib/services/auth.service";
+import type { PlanName } from "@/lib/types";
 
 const tokenSchema = z.object({
   input: z.number().int().nonnegative(),
@@ -46,10 +47,19 @@ export async function POST(request: Request) {
 
   const result = await meterService.record({
     tenantId: tenant.id,
+    plan: tenant.plan as PlanName,
+    tenantStatus: tenant.status,
     type: parsed.data.type,
     tokens: parsed.data.type === "ai_tokens" ? parsed.data.tokens : undefined,
     idempotencyKey,
   });
+
+  if (!result.ok) {
+    return NextResponse.json(
+      { error: result.decision.reason },
+      { status: result.decision.status },
+    );
+  }
 
   return NextResponse.json(
     {

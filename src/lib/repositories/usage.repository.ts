@@ -19,16 +19,7 @@ export const usageRepository = {
   },
 
   async create(input: CreateUsageEventInput) {
-    return prisma.usageEvent.create({
-      data: {
-        tenantId: input.tenantId,
-        type: input.type,
-        quantity: input.quantity,
-        tokenBreakdown: input.tokenBreakdown,
-        costCents: input.costCents,
-        idempotencyKey: input.idempotencyKey,
-      },
-    });
+    return prisma.usageEvent.create({ data: input });
   },
 
   async sumQuantity(tenantId: string, type: UsageType) {
