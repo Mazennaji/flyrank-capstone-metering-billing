@@ -1,9 +1,9 @@
-import { UsageType } from "@prisma/client";
 import {
   TOKEN_RATES_MICROCENTS,
   API_CALL_COST_CENTS,
   type TokenBreakdown,
 } from "@/lib/config/pricing.config";
+import type { UsageType } from "@/lib/types";
 
 export function computeCost(type: UsageType, tokens?: TokenBreakdown): number {
   if (type === "api_call") return API_CALL_COST_CENTS;

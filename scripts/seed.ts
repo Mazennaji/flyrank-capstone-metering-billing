@@ -1,30 +1,30 @@
-import { PrismaClient, Plan } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PLAN_LIMITS } from "../src/lib/config/pricing.config";
 
 const prisma = new PrismaClient();
 
 async function main() {
   await prisma.planLimit.upsert({
-    where: { id: Plan.free },
+    where: { id: "free" },
     update: {
       apiCallLimit: PLAN_LIMITS.free.apiCallLimit,
       aiTokenLimit: BigInt(PLAN_LIMITS.free.aiTokenLimit),
     },
     create: {
-      id: Plan.free,
+      id: "free",
       apiCallLimit: PLAN_LIMITS.free.apiCallLimit,
       aiTokenLimit: BigInt(PLAN_LIMITS.free.aiTokenLimit),
     },
   });
 
   await prisma.planLimit.upsert({
-    where: { id: Plan.pro },
+    where: { id: "pro" },
     update: {
       apiCallLimit: PLAN_LIMITS.pro.apiCallLimit,
       aiTokenLimit: BigInt(PLAN_LIMITS.pro.aiTokenLimit),
     },
     create: {
-      id: Plan.pro,
+      id: "pro",
       apiCallLimit: PLAN_LIMITS.pro.apiCallLimit,
       aiTokenLimit: BigInt(PLAN_LIMITS.pro.aiTokenLimit),
     },
@@ -36,7 +36,7 @@ async function main() {
     create: {
       name: "Demo Tenant",
       apiKey: "demo-tenant-key",
-      plan: Plan.free,
+      plan: "free",
     },
   });
 
@@ -47,7 +47,7 @@ async function main() {
   if (already === 0) {
     const events = Array.from({ length: 990 }, (_, i) => ({
       tenantId: tenant.id,
-      type: "api_call" as const,
+      type: "api_call",
       quantity: BigInt(1),
       costCents: 1,
       idempotencyKey: `seed-api-${i}`,

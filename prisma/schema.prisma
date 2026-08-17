@@ -3,34 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum Plan {
-  free
-  pro
-}
-
-enum TenantStatus {
-  active
-  past_due
-  canceled
-}
-
-enum UsageType {
-  api_call
-  ai_tokens
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Tenant {
-  id               String       @id @default(uuid())
+  id               String   @id @default(uuid())
   name             String
-  stripeCustomerId String?      @unique @map("stripe_customer_id")
-  plan             Plan         @default(free)
-  status           TenantStatus @default(active)
-  apiKey           String       @unique @map("api_key")
-  createdAt        DateTime     @default(now()) @map("created_at")
+  stripeCustomerId String?  @unique @map("stripe_customer_id")
+  plan             String   @default("free")
+  status           String   @default("active")
+  apiKey           String   @unique @map("api_key")
+  createdAt        DateTime @default(now()) @map("created_at")
 
   usageEvents   UsageEvent[]
   subscriptions Subscription[]
@@ -39,7 +23,7 @@ model Tenant {
 }
 
 model PlanLimit {
-  id           Plan   @id
+  id           String @id
   apiCallLimit Int    @map("api_call_limit")
   aiTokenLimit BigInt @map("ai_token_limit")
 
@@ -47,14 +31,14 @@ model PlanLimit {
 }
 
 model UsageEvent {
-  id             String    @id @default(uuid())
-  tenantId       String    @map("tenant_id")
-  type           UsageType
+  id             String   @id @default(uuid())
+  tenantId       String   @map("tenant_id")
+  type           String
   quantity       BigInt
-  tokenBreakdown Json?     @map("token_breakdown")
-  costCents      Int       @map("cost_cents")
-  idempotencyKey String    @map("idempotency_key")
-  createdAt      DateTime  @default(now()) @map("created_at")
+  tokenBreakdown String?  @map("token_breakdown")
+  costCents      Int      @map("cost_cents")
+  idempotencyKey String   @map("idempotency_key")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -68,7 +52,7 @@ model Subscription {
   id                   String   @id @default(uuid())
   tenantId             String   @map("tenant_id")
   stripeSubscriptionId String   @unique @map("stripe_subscription_id")
-  plan                 Plan
+  plan                 String
   status               String
   currentPeriodEnd     DateTime @map("current_period_end")
   updatedAt            DateTime @updatedAt @map("updated_at")

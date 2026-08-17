@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/db/client";
-import { Prisma, UsageType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import type { UsageType } from "@/lib/types";
 
 export type CreateUsageEventInput = {
   tenantId: string;
   type: UsageType;
   quantity: bigint;
-  tokenBreakdown: Prisma.InputJsonValue | null;
+  tokenBreakdown: string | null;
   costCents: number;
   idempotencyKey: string;
 };
@@ -13,9 +14,7 @@ export type CreateUsageEventInput = {
 export const usageRepository = {
   async findByIdempotencyKey(tenantId: string, idempotencyKey: string) {
     return prisma.usageEvent.findUnique({
-      where: {
-        tenant_idempotency: { tenantId, idempotencyKey },
-      },
+      where: { tenant_idempotency: { tenantId, idempotencyKey } },
     });
   },
 
@@ -25,7 +24,7 @@ export const usageRepository = {
         tenantId: input.tenantId,
         type: input.type,
         quantity: input.quantity,
-        tokenBreakdown: input.tokenBreakdown ?? Prisma.JsonNull,
+        tokenBreakdown: input.tokenBreakdown,
         costCents: input.costCents,
         idempotencyKey: input.idempotencyKey,
       },
