@@ -7,6 +7,13 @@
 # Testing
 /coverage
 
+
+.agents/
+skills-lock.json
+
+.claude
+.windsurf
+
 # Next.js
 /.next/
 /out/
@@ -48,3 +55,4 @@ Thumbs.db
 
 # Misc
 *.tsbuildinfo
+/src/generated/prisma
