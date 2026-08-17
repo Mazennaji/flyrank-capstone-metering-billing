@@ -7,7 +7,7 @@
 # Testing
 /coverage
 
-
+test.db
 .agents/
 skills-lock.json
 
