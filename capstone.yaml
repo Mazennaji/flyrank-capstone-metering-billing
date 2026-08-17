@@ -1,0 +1,26 @@
+name: usage-metering-billing-engine
+track: backend
+language: typescript
+framework: nextjs
+
+run: "docker compose up -d && npm run db:migrate && npm run dev"
+
+seed: "npm run seed"
+
+test: "npm test"
+
+base_url: "http://localhost:3000"
+
+endpoints:
+  - method: POST
+    path: /api/generate
+    note: "Billable action. Requires Idempotency-Key header. Meters + quota-checks."
+  - method: GET
+    path: /api/usage
+    note: "Rollup: used / limit / cost per usage type."
+  - method: POST
+    path: /api/checkout
+    note: "Creates a Stripe test-mode Checkout session."
+  - method: POST
+    path: /api/webhooks/stripe
+    note: "Verified Stripe event handler (signature + dedupe)."
