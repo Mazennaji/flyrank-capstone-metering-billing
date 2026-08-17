@@ -1,13 +1,87 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  free
+  pro
+}
+
+enum TenantStatus {
+  active
+  past_due
+  canceled
+}
+
+enum UsageType {
+  api_call
+  ai_tokens
+}
+
+model Tenant {
+  id               String       @id @default(uuid())
+  name             String
+  stripeCustomerId String?      @unique @map("stripe_customer_id")
+  plan             Plan         @default(free)
+  status           TenantStatus @default(active)
+  apiKey           String       @unique @map("api_key")
+  createdAt        DateTime     @default(now()) @map("created_at")
+
+  usageEvents   UsageEvent[]
+  subscriptions Subscription[]
+
+  @@map("tenants")
+}
+
+model PlanLimit {
+  id           Plan   @id
+  apiCallLimit Int    @map("api_call_limit")
+  aiTokenLimit BigInt @map("ai_token_limit")
+
+  @@map("plans")
+}
+
+model UsageEvent {
+  id             String    @id @default(uuid())
+  tenantId       String    @map("tenant_id")
+  type           UsageType
+  quantity       BigInt
+  tokenBreakdown Json?     @map("token_breakdown")
+  costCents      Int       @map("cost_cents")
+  idempotencyKey String    @map("idempotency_key")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, idempotencyKey], name: "tenant_idempotency")
+  @@index([tenantId, createdAt])
+  @@index([tenantId, type, createdAt])
+  @@map("usage_events")
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  tenantId             String   @map("tenant_id")
+  stripeSubscriptionId String   @unique @map("stripe_subscription_id")
+  plan                 Plan
+  status               String
+  currentPeriodEnd     DateTime @map("current_period_end")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("subscriptions")
+}
+
+model ProcessedWebhookEvent {
+  stripeEventId String   @id @map("stripe_event_id")
+  processedAt   DateTime @default(now()) @map("processed_at")
+
+  @@map("processed_webhook_events")
 }
