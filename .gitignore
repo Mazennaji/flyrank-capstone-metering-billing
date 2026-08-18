@@ -7,12 +7,15 @@
 # Testing
 /coverage
 
-test.db
 .agents/
 skills-lock.json
 
 .claude
 .windsurf
+
+dev.db
+test.db
+body.json
 
 # Next.js
 /.next/
