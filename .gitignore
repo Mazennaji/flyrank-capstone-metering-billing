@@ -16,6 +16,7 @@ skills-lock.json
 dev.db
 test.db
 body.json
+fake.json
 
 # Next.js
 /.next/
