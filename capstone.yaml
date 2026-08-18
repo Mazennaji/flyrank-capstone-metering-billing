@@ -3,8 +3,7 @@ track: backend
 language: typescript
 framework: nextjs
 
-run: "docker compose up -d && npm run db:migrate && npm run dev"
-
+run: "npm install && npm run db:migrate && npm run dev"
 seed: "npm run seed"
 
 test: "npm test"
@@ -12,15 +11,18 @@ test: "npm test"
 base_url: "http://localhost:3000"
 
 endpoints:
+  - method: GET
+    path: /api/health
+    note: "Liveness + DB connectivity check."
   - method: POST
     path: /api/generate
-    note: "Billable action. Requires Idempotency-Key header. Meters + quota-checks."
+    note: "Billable action. Requires Authorization + Idempotency-Key headers. Meters + quota-checks + prices."
   - method: GET
     path: /api/usage
     note: "Rollup: used / limit / cost per usage type."
   - method: POST
     path: /api/checkout
-    note: "Creates a Stripe test-mode Checkout session."
+    note: "Creates a Stripe test-mode Checkout session (returns a cs_test_ URL)."
   - method: POST
     path: /api/webhooks/stripe
-    note: "Verified Stripe event handler (signature + dedupe)."
+    note: "Verified Stripe event handler (signature + dedupe + plan sync)."
